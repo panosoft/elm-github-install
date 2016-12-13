@@ -1,74 +1,112 @@
 # elm-github-install
 
-[![npm version](https://badge.fury.io/js/elm-github-install.svg)](https://badge.fury.io/js/elm-github-install)
+> Fork of [gdotdesign/elm-github-install](https://github.com/gdotdesign/elm-github-install/tree/0.2.0) with Gitlab support.
 
-This node script and package that allows you to install Elm packages **directly
-from Github**, bypassing the package repository (package.elm-lang.org) while also
-enabling restricted (effect manager and native) packages to be installed.
+# Usefulness
+This is a hack. Plain and simple. Ideally, Elm will move to support other repositories. But until that happens, there's this.
 
-## Description
 
-There are some things that made this possible:
-* The basic design of Elm packages: using github, semantic versioning and tags
-* [Semver package](https://www.npmjs.com/package/semver) to validate versions
-* [SemverResolver package](https://github.com/pghalliday/semver-resolver) that
-  does the actual resolving
+# Gitlab configuration
 
-These are the steps the installer takes:
-* Reads the dependencies from `elm-package.json`
-* Transforms them to semver dependencies - **4.0.4 <= v < 5.0.0** becomes
-	**>= 4.0.4 < 5.0.0**
-* Loads the dependencies of the packages form Github and transforms them also
-* Resolve the dependencies
-* Install resolved dependencies into `elm-stuff/packages`
-* Writes `elm-stuff/exact-dependencies.json` with the resolved dependencies
+Gitlab must be configured properly to work with this install program.
 
-## Warnings
+## Protocols
 
-There are some caveats though:
-* [TODO] This installer doesn't check the installed elm-version
-* [DEPENDENCY] Git tags (semver) are needed other references cannot be installed
-	(branch-name, commit-hash)
-* [DEPENDENCY] Git is needed
-* [DEPENDENCY] Node is needed
+Gitlab must support HTTPS and GIT protocols.
 
-## Usage
+### Git protocol configuration
 
-Install it:
+The following are the steps necessary to support the GIT protocol for Gitlab on Ubuntu.
+
+1. Create `local-git-daemon.conf`
+2. Add line to `rc.local`
+3. Start daemon
+
+#### Create `local-git-daemon.conf`
+
+```bash
+sudo nano /etc/init/local-git-daemon.conf
 ```
-npm install -g elm-github-install
+Add the following lines:
+```bash
+start on startup
+stop on shutdown
+exec /usr/bin/git daemon \
+    --user=git --group=git --enable=upload-pack --export-all \
+    --syslog  --verbose  --reuseaddr --base-path-relaxed \
+    --base-path=<path-to-repositiory-root> \
+    <path-to-repositiory-root> \
+respawn
+```
+where `<path-to-repositiory-root>` must be changed in 2 places.
+
+N.B. `--export-all` will export all repositories via `git://`. This may NOT be what you want in your environment. (We run Gitlab on our VPN so it works for us.)
+
+You may want to NOT include this option and instead place the empty file, `git-daemon-export-ok`, in the directory. Note that permission issues may prevent this from working.
+
+#### Add line to `rc.local`
+
+In order to auto start the Git Daemon, we must add a line to start it to `rc.local`:
+
+```bash
+sudo nano /etc/rc.local
 ```
 
-Elm packages are name after their github repositories, so you can simply declare the
-github package you want the way you would declare any other package.
-For example, if you want to install [NoRedInk's Elm css](https://github.com/NoRedInk/nri-elm-css)
-at version 1.3.0, you would do the following:
+Add the following line:
 
+```bash
+sudo initctl start local-git-daemon
 ```
-# elm-package.json
+
+#### Start daemon
+
+```bash
+sudo initctl start local-git-daemon
+```
+
+## Archivist User
+
+To get an archive from Gitlab using the REST API, credentials must be provided. The approach taken was to create a user with `Reporter` role in the `Group` or in the `Repo`.
+
+Then the `Private Token` of that user will be used in the `elm-package.json` file to allow retrieval of the archive.
+
+**N.B. This is a potential security vunerability. Since we're using Gitlab on our VPN, everyone who has access is authenticated via 2-factor authentication and therefore not a security issue.**
+
+# Elm Project configuration
+
+In the `elm-package-json`, there are 2 new sections to support Gitlab, `gitlab-tokens` and `gitlab-dependencies`:
+
+```json
 {
-  ...
-  "dependencies": {
-    ...
-    "githubUser/repoName": "desiredVersion <= v < someLargerNumber",
-    "NoRedInk/nri-elm-css": "1.3.0 <= 1.3.0 < 2.0.0",
-    ...
-  }
-  ...
+    "version": "1.0.0",
+    "summary": "My Project",
+    "repository": "https://github.com/nobody/norepo.git",
+    "license": "Unlicense",
+    "source-directories": [
+        "src"
+    ],
+    "exposed-modules": [
+		"MyModule"
+	],
+    "dependencies": {
+        "elm-lang/core": "4.0.5 <= v < 5.0.0",
+        "elm-lang/html": "1.1.0 <= v < 2.0.0"
+    },
+	"gitlab-tokens": {
+		"gitlab.panosoft.com": "dG3gnzQCwMyuUnwxMPvM"
+	},
+    "gitlab-dependencies": {
+        "gitlab.panosoft.com/guardian/session-service": "1.0.0 <= v < 2.0.0"
+    },
+    "elm-version": "0.17.1 <= v < 0.18.0"
 }
 ```
 
-You can find the current version of the package in the repository's `elm-package.json`.
+## Repository key
+Normally, you put your Github repo address here. It can ONLY be a Github address. If your project is NOT on Github, e.g. Gitlab, you have to still put a Github address here otherwise the Elm compiler will generate an error.
 
-Use the command:
-```
-elm-github-install
-```
+## Gitlab Tokens key
+Each server address has an Archivist User token. This is to allow `elm-github-install` to grab an archive from your Gitlab server and provide authentication in the REST call.
 
-## Demonstration
-The following repositories have their packages successfully installed and
-the main file successfully compiled (2016-06-12):
-* [STANDARD] https://github.com/debois/elm-mdl/tree/v7/demo - Demo.elm
-* [STANDARD] https://github.com/evancz/elm-sortable-table/tree/master/examples -
-	1-presidents.elm
-* [HAVE GITHUB DEPS] https://github.com/gdotdesign/elm-ui-website - source/Main.elm
+## Gitlab Dependencies key
+This is identical to the `dependencies` key with the exception of the server prefix. This could not be put into the `dependencies` key since the Elm compiler will generate an error.
