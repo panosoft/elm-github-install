@@ -110,3 +110,9 @@ Each server address has an Archivist User token. This is to allow `elm-github-in
 
 ## Gitlab Dependencies key
 This is identical to the `dependencies` key with the exception of the server prefix. This could not be put into the `dependencies` key since the Elm compiler will generate an error.
+
+# Installation
+
+```bash
+npm install -g git://github.com/panosoft/elm-github-install
+```
