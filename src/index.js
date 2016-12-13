@@ -198,6 +198,11 @@ module.exports = function(){
       if(error) {
         console.log('\nSome packages failed to install!')
       } else {
+        // remove server names from deps
+		deps = Object.keys(deps).reduce(function(newDeps, key) {
+			newDeps[packageName(key)] = deps[key]
+			return newDeps
+		}, {})
         // Write te exact-dependencies.json
         fs.writeFileSync(path.resolve('elm-stuff/exact-dependencies.json'),
                          JSON.stringify(deps, null, '  '))
