@@ -31,7 +31,8 @@ var packageName = function(package) {
   return packageName
 }
 var getServer = function(package) {
-  return package.split('/')[0]
+  var server = package.split('/')[0]
+  return server.indexOf('.') == -1 ? '' : server
 }
 var getToken = function(package, gitlabTokens) {
 	return gitlabTokens[getServer(package)]
@@ -186,7 +187,7 @@ module.exports = function(){
   // Transform dependencies into semver versions
   var packages = transformDependencies(packageConfig.dependencies, packageConfig['gitlab-dependencies'])
 
-  var gitlabTokens = packageConfig['gitlab-tokens']
+  var gitlabTokens = packageConfig['gitlab-tokens'] || {}
 
   // Create a resolver
   var resolver = new SemverResolver(packages, getVersions, getDependencies(gitlabTokens))
