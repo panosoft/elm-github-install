@@ -69,7 +69,7 @@ var installExternalPackage = function(package, ref, gitlabTokens) {
 		})
 	}
 	else {
-      var archiveUrl = 'https://' + package + '/archive/' + ref + '.zip'
+      var archiveUrl = 'https://' + fullPackage(package) + '/archive/' + ref + '.zip'
       // Set up a temp file to store the archive in
       var tmpFile = tmp.fileSync()
       // Get the archive into the temp file
@@ -116,6 +116,15 @@ var getSemerVersion = function(version) {
 
 // Transform all Elm dependencies into the semver versions.
 var transformDependencies = function(deps, gitlabDeps){
+  // remove gitlab keys from deps
+  var filterKeys = Object.keys(gitlabDeps || {}).map(function(key) {
+	  return packageName(key)
+  })
+  deps = Object.keys(deps).reduce(function(newDeps, key) {
+	  if (filterKeys.indexOf(key) == -1)
+	  	newDeps[key] = deps[key]
+	  return newDeps
+  }, {})
   Object.keys(gitlabDeps || {}).forEach(function(key) {
 	  deps[key] = gitlabDeps[key]
   })

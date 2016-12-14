@@ -90,7 +90,8 @@ In the `elm-package-json`, there are 2 new sections to support Gitlab, `gitlab-t
 	],
     "dependencies": {
         "elm-lang/core": "4.0.5 <= v < 5.0.0",
-        "elm-lang/html": "1.1.0 <= v < 2.0.0"
+        "elm-lang/html": "1.1.0 <= v < 2.0.0",
+		"guardian/session-service": "1.0.0 <= v < 2.0.0"
     },
 	"gitlab-tokens": {
 		"gitlab.panosoft.com": "dG3gnzQCwMyuUnwxMPvM"
@@ -101,6 +102,8 @@ In the `elm-package-json`, there are 2 new sections to support Gitlab, `gitlab-t
     "elm-version": "0.17.1 <= v < 0.18.0"
 }
 ```
+## Dependency key
+Notice that `guardian/session-service` is here even though it comes from Gitlab. That's because the Elm compiler relies on this for the `import` statement. This is unfortunate but the versions SHOULD match but the one that matters is the one in `gitlab-dependencies`.
 
 ## Repository key
 Normally, you put your Github repo address here. It can ONLY be a Github address. If your project is NOT on Github, e.g. Gitlab, you have to still put a Github address here otherwise the Elm compiler will generate an error.
