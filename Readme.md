@@ -93,9 +93,9 @@ In the `elm-package-json`, there are 2 new sections to support Gitlab, `gitlab-t
         "elm-lang/html": "1.1.0 <= v < 2.0.0",
 		"guardian/session-service": "1.0.0 <= v < 2.0.0"
     },
-	"gitlab-tokens": {
-		"gitlab.panosoft.com": "dG3gnzQCwMyuUnwxMPvM"
-	},
+    "gitlab-tokens": {
+        "gitlab.panosoft.com": "yEop81GbnEQLjkHEajHO"
+    },
     "gitlab-dependencies": {
         "gitlab.panosoft.com/guardian/session-service": "1.0.0 <= v < 2.0.0"
     },
