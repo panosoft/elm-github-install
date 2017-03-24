@@ -6,7 +6,7 @@
 This is a hack. Plain and simple. Ideally, Elm will move to support other repositories. But until that happens, there's this.
 
 
-# Gitlab configuration
+# Gitlab Server Configuration
 
 Gitlab must be configured properly to work with this install program.
 
@@ -63,10 +63,11 @@ sudo initctl start local-git-daemon
 ```bash
 sudo initctl start local-git-daemon
 ```
+# Gitlab Group/Project configuration
 
 ## Archivist User
 
-To get an archive from Gitlab using the REST API, credentials must be provided. The approach taken was to create a user with `Reporter` role in the `Group` or in the `Repo`.
+To get an archive from Gitlab using the REST API, credentials must be provided. The approach taken was to create a user with `Reporter` role in the `Group` or in the `Project`.
 
 Then the `Private Token` of that user will be used in the `elm-package.json` file to allow retrieval of the archive.
 
