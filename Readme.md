@@ -1,3 +1,5 @@
+# DEPRECATED Please use [Grove](https://github.com/panosoft/elm-grove)
+
 # elm-github-install
 
 > Fork of [gdotdesign/elm-github-install](https://github.com/gdotdesign/elm-github-install/tree/0.2.0) with Gitlab support.
